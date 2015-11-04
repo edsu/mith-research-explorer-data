@@ -137,8 +137,7 @@ function main() {
   }
 
   header("Content-Type: application/json");
-  $json = json_encode($data);
-  echo $json;
+  echo json_encode($data);
 }
 
 
