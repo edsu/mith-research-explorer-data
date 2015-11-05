@@ -2,4 +2,5 @@ RewriteEngine On
 RewriteBase /wp-content/mu-plugins/mith-research-explorer-data/
 
 RewriteRule ^projects.json plugin.php?action=projects
-RewriteRule ^taxonomy.json plugin.php?action=taxonomy
+RewriteRule ^topics.json plugin.php?action=topics
+RewriteRule ^types.json plugin.php?action=types

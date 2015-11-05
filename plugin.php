@@ -62,8 +62,7 @@ function project_terms($project_id) {
   global $wpdb;
 
   $q = "
-    SELECT wp_terms.name AS name,
-      wp_term_taxonomy.taxonomy AS taxonomy
+    SELECT wp_terms.name AS name
     FROM wp_term_relationships, wp_term_taxonomy, wp_terms
     WHERE 
       wp_term_relationships.object_id = %s
@@ -83,7 +82,25 @@ function project_terms($project_id) {
 }
 
 
-function taxonomy() {
+function topics() {
+  return taxonomy('mith_topic');
+}
+
+
+function types() {
+  $t = taxonomy('mith_research_type');
+  $t[] = array(
+    "name" => "Other",
+    "slug" => "other",
+    "broader" => [],
+    "narrower" => []
+  );
+
+  return $t;
+}
+
+
+function taxonomy($taxonomy) {
   global $wpdb;
 
   $q = "
@@ -91,10 +108,10 @@ function taxonomy() {
     FROM wp_terms, wp_term_taxonomy
     WHERE 
       wp_terms.term_id = wp_term_taxonomy.term_id
-      AND wp_term_taxonomy.taxonomy IN ('mith_topic')
+      AND wp_term_taxonomy.taxonomy IN (%s)
     ";
   $terms = array();
-  foreach ($wpdb->get_results($q, ARRAY_A) as $term) {
+  foreach ($wpdb->get_results($wpdb->prepare($q, $taxonomy), ARRAY_A) as $term) {
     $terms[$term["name"]] = array(
       "slug" => $term["slug"],
       "broader" => array(),
@@ -103,8 +120,7 @@ function taxonomy() {
   }
 
   $q = "
-    SELECT wp_term_taxonomy.taxonomy AS taxonomy, 
-    wp_term_taxonomy.description AS description, 
+    SELECT wp_term_taxonomy.description AS description, 
       terms.name AS term_name,
       parent_terms.name AS parent_term
     FROM wp_term_taxonomy
@@ -117,7 +133,6 @@ function taxonomy() {
     if (! array_key_exists($term_name, $terms)) {
       continue;
     }
-    $terms[$term_name]["taxonomy"] = $taxon["taxonomy"];
     if ($taxon["parent_term"]) {
       $broader = $taxon["parent_term"];
       $terms[$term_name]["broader"][] = $broader;
@@ -125,13 +140,22 @@ function taxonomy() {
     }
   }
 
-  return $terms;
+  $term_list = [];
+  foreach ($terms as $name => $term) {
+    $term['name'] = $name;
+    $term_list[] = $term; 
+  }
+
+  return $term_list;
 }
 
 
 function main() {
-  if ($_REQUEST["action"] == "taxonomy") {
-    $data = taxonomy(); 
+  $action = $_REQUEST["action"];
+  if ($action == "topics") {
+    $data = topics(); 
+  } else if ($action == "types") {
+    $data = types();
   } else {
     $data = projects();
   }
