@@ -17,7 +17,7 @@ function projects() {
     SELECT 
       wp_posts.id AS id,
       wp_posts.post_title AS title,
-      wp_posts.post_name AS name,
+      wp_posts.post_name AS slug,
       wp_posts.post_excerpt AS description
     FROM wp_posts
     WHERE wp_posts.post_type = 'mith_research'
@@ -46,11 +46,14 @@ function project_metadata($project_id) {
     $k = $r["meta_key"];
     $v = $r["meta_value"];
 
-    if (!preg_match('/^research_/', $k)) {
+    if (! $v or $v == "null") {
       continue;
     }
-    else if ($v and $v != "null") {
+
+    if (preg_match('/^(research_/', $k)) {
       $results[$k] = $v;
+    } else if ($k == "_thumbnail_id") {
+      $results["thumbnail"] = get_thumbnail($v);
     }
   }
   
@@ -68,7 +71,7 @@ function project_terms($project_id) {
       wp_term_relationships.object_id = %s
       AND wp_term_relationships.term_taxonomy_id = wp_term_taxonomy.term_taxonomy_id
       AND wp_term_taxonomy.term_id = wp_terms.term_id
-      ";
+    ";
 
   $results = array();
   foreach ($wpdb->get_results($wpdb->prepare($q, $project_id), ARRAY_A) as $r) {
@@ -79,6 +82,19 @@ function project_terms($project_id) {
   }
 
   return $results;
+}
+
+function get_thumbnail($thumb_id) {
+  global $wpdb;
+
+  $q = "
+    SELECT guid
+    FROM wp_posts
+    WHERE post_type = 'attachment'
+    AND id = %d
+    ";
+  
+  return $wpdb->get_var($wpdb->prepare($q, $thumb_id));
 }
 
 
