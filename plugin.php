@@ -50,7 +50,7 @@ function project_metadata($project_id) {
       continue;
     }
 
-    if (preg_match('/^(research_/', $k)) {
+    if (preg_match('/^research_/', $k)) {
       $results[$k] = $v;
     } else if ($k == "_thumbnail_id") {
       $results["thumbnail"] = get_thumbnail($v);
