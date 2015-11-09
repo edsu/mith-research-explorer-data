@@ -65,7 +65,8 @@ function project_terms($project_id) {
   global $wpdb;
 
   $q = "
-    SELECT wp_terms.name AS name
+    SELECT wp_terms.name AS name,
+      wp_term_taxonomy.taxonomy AS taxonomy
     FROM wp_term_relationships, wp_term_taxonomy, wp_terms
     WHERE 
       wp_term_relationships.object_id = %s
