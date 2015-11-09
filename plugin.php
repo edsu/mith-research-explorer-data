@@ -100,7 +100,15 @@ function get_thumbnail($thumb_id) {
 
 
 function topics() {
-  return taxonomy('mith_topic');
+  $t = taxonomy('mith_topic');
+  $t[] = array(
+    "name" => "Other",
+    "slug" => "other",
+    "broader" => [],
+    "narrower" => []
+  );
+
+  return $t;
 }
 
 
