@@ -43,6 +43,11 @@ function project_metadata($project_id, $people) {
     WHERE post_id = %d
     ";
 
+  $start_year = null;
+  $start_month = "01";
+  $end_year = null;
+  $end_month = "12";
+
   $results = array();
   $project_people = array();
   $links = array();
@@ -74,9 +79,27 @@ function project_metadata($project_id, $people) {
         $links[$m[1]] = array("title" => "Website");
       }
       $links[$m[1]][$m[2]] = $v;
-    #} else if (preg_match('/^research_/', $k)) {
-    #  $results[$k] = $v;
+    } else if ($k == "research_start_mth") {
+      $start_month = $v;
+    } else if ($k == "research_start_yr") {
+      $start_year = $v;
+    } else if ($k == "research_end_mth") {
+      $end_month = $v;
+    } else if ($k == "research_end_yr") {
+      $end_year = $v;
     }
+  }
+
+  if ($start_year) {
+    $results["start"] = sprintf("%s-%s-01", $start_year, $start_month);
+  } else {
+    $results["start"] = null;
+  }
+
+  if ($end_year) {
+    $results["end"] = sprintf("%s-%s-01", $end_year, $end_month);
+  } else {
+    $results["end"] = null;
   }
 
   $results["member"] = array_values($project_people);
