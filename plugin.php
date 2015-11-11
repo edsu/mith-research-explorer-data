@@ -12,6 +12,7 @@ require(dirname(__FILE__) . '/../../../wp-config.php');
 
 function projects() {
   global $wpdb;
+  $people = people();
 
   $q = "
     SELECT 
@@ -24,7 +25,7 @@ function projects() {
     ";
 
   foreach ($wpdb->get_results($q, ARRAY_A) as $project) {
-    $project = $project + project_metadata($project["id"]);
+    $project = $project + project_metadata($project["id"], $people);
     $project = $project + project_terms($project["id"]);
     $projects[] = $project;
   }
@@ -33,7 +34,7 @@ function projects() {
 }
 
 
-function project_metadata($project_id) {
+function project_metadata($project_id, $people) {
   global $wpdb;
 
   $q = "
@@ -41,7 +42,11 @@ function project_metadata($project_id) {
     FROM wp_postmeta
     WHERE post_id = %d
     ";
+
   $results = array();
+  $project_people = array();
+  $links = array();
+
   foreach ($wpdb->get_results($wpdb->prepare($q, $project_id), ARRAY_A) as $r) {
     $k = $r["meta_key"];
     $v = $r["meta_value"];
@@ -50,12 +55,32 @@ function project_metadata($project_id) {
       continue;
     }
 
-    if (preg_match('/^research_/', $k)) {
-      $results[$k] = $v;
+    if (preg_match('/^research_people_(int_\d+)_research_person$/', $k, $m)) {
+      $project_people[$m[1]] = array(
+        "name" => $people[$v],
+        "affiliation" => "University of Maryland"
+      );
+    } else if (preg_match('/^research_people_(ext_\d+)_research_person_(name|affiliation|department)/', $k, $m)) {
+      if (! $project_people[$m[1]]) {
+        $project_people[$m[1]] = array("name" => null, "affiliation" => "University of Maryland, College Park");
+      }
+      $project_people[$m[1]][$m[2]] = $v;
     } else if ($k == "_thumbnail_id") {
       $results["thumbnail"] = get_thumbnail($v);
+    } else if ($k == "research_website_url") {
+      $results["website"] = "http://" . $v;
+    } else if (preg_match('/^research_links_ext_(\d+)_research_link_(url|title)$/', $k, $m)) {
+      if (! $links[$m[1]]) {
+        $links[$m[1]] = array("title" => "Website");
+      }
+      $links[$m[1]][$m[2]] = $v;
+    #} else if (preg_match('/^research_/', $k)) {
+    #  $results[$k] = $v;
     }
   }
+
+  $results["member"] = array_values($project_people);
+  $results["link"] = array_values($links);
   
   return $results;
 }
@@ -84,6 +109,24 @@ function project_terms($project_id) {
 
   return $results;
 }
+
+
+function people() {
+  global $wpdb;
+
+  $q = "
+    SELECT id, post_title AS name
+    FROM wp_posts 
+    WHERE post_type = 'mith_person'
+    ";
+  $people = array();
+  foreach ($wpdb->get_results($q, ARRAY_A) as $p) {
+    $people[$p["id"]] = $p["name"];
+  }
+
+  return $people;
+}
+
 
 function get_thumbnail($thumb_id) {
   global $wpdb;
@@ -181,6 +224,8 @@ function main() {
     $data = topics(); 
   } else if ($action == "types") {
     $data = types();
+  } else if ($action == "people") {
+    $data = people();
   } else {
     $data = projects();
   }
