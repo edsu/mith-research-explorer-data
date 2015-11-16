@@ -67,7 +67,7 @@ function project_metadata($project_id, $people) {
       );
     } else if (preg_match('/^research_people_(ext_\d+)_research_person_(name|affiliation|department)/', $k, $m)) {
       if (! $project_people[$m[1]]) {
-        $project_people[$m[1]] = array("name" => null, "affiliation" => "University of Maryland, College Park");
+        $project_people[$m[1]] = array("name" => null, "affiliation" => "University of Maryland");
       }
       $project_people[$m[1]][$m[2]] = $v;
     } else if ($k == "_thumbnail_id") {
