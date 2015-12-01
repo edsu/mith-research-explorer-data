@@ -44,9 +44,9 @@ function project_metadata($project_id, $people) {
     ";
 
   $start_year = null;
-  $start_month = "01";
+  $start_month = "";
   $end_year = null;
-  $end_month = "12";
+  $end_month = "";
 
   $results = array();
   $project_people = array();
@@ -91,13 +91,23 @@ function project_metadata($project_id, $people) {
   }
 
   if ($start_year) {
-    $results["start"] = sprintf("%s-%s-01", $start_year, $start_month);
+    if ($start_month != "") {
+      $results["start"] = sprintf("%s-%s-01", $start_year, $start_month);
+    }
+    else {
+      $results["start"] = $start_year;  
+    }
   } else {
     $results["start"] = null;
   }
 
   if ($end_year) {
-    $results["end"] = sprintf("%s-%s-01", $end_year, $end_month);
+    if ($end_month != "") {
+      $results["end"] = sprintf("%s-%s-01", $end_year, $end_month);  
+    }
+    else {
+     $results["end"] = $end_year; 
+    }
   } else {
     $results["end"] = null;
   }
