@@ -47,6 +47,7 @@ function project_metadata($project_id, $people) {
   $start_month = "";
   $end_year = null;
   $end_month = "";
+  $active = false;
 
   $results = array();
   $project_people = array();
@@ -87,7 +88,10 @@ function project_metadata($project_id, $people) {
       $end_month = $v;
     } else if ($k == "research_end_yr") {
       $end_year = $v;
+    } else if ($k == "research_status_active" and $v == 1) {
+      $active = true;
     }
+
   }
 
   if ($start_year) {
@@ -114,6 +118,7 @@ function project_metadata($project_id, $people) {
 
   $results["member"] = array_values($project_people);
   $results["link"] = array_values($links);
+  $results["active"] = $active;
   
   return $results;
 }
