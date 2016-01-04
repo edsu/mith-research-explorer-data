@@ -22,6 +22,7 @@ function projects() {
       wp_posts.post_excerpt AS description
     FROM wp_posts
     WHERE wp_posts.post_type = 'mith_research'
+    AND wp_posts.post_status = 'publish'
     ";
 
   foreach ($wpdb->get_results($q, ARRAY_A) as $project) {
@@ -269,6 +270,7 @@ function main() {
   }
 
   header("Content-Type: application/json");
+  header("Access-Control-Allow-Origin: *");
   echo json_encode($data);
 }
 
