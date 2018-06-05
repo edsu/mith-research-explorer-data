@@ -75,7 +75,7 @@ function project_metadata($project_id, $people) {
     } else if ($k == "_thumbnail_id") {
       $results["thumbnail"] = get_thumbnail($v);
     } else if ($k == "research_website_url") {
-      $results["website"] = "http://" . $v;
+      $results["website"] = "//" . $v;
     } else if (preg_match('/^research_links_ext_(\d+)_research_link_(url|title)$/', $k, $m)) {
       if (! $links[$m[1]]) {
         $links[$m[1]] = array("title" => "Website");
@@ -177,7 +177,8 @@ function get_thumbnail($thumb_id) {
     AND id = %d
     ";
   
-  return $wpdb->get_var($wpdb->prepare($q, $thumb_id));
+  $url = $wpdb->get_var($wpdb->prepare($q, $thumb_id));
+  return preg_replace('/^http:/', 'https:', $url);
 }
 
 
